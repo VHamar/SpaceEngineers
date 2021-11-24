@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31911.196
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Usstan's Ice Controller", "Usstan's Ice Controller\Usstan's Ice Controller.csproj", "{B50AC57D-5ABC-4D95-A542-49F5CF06888B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Usstans Sci-Fi Buttons Controller", "Usstans Sci-Fi Buttons Controller\Usstans Sci-Fi Buttons Controller.csproj", "{D1708BA9-CC7B-4B7D-BB51-DCF7871947F2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B50AC57D-5ABC-4D95-A542-49F5CF06888B}.Debug|x64.ActiveCfg = Debug|x64
+		{B50AC57D-5ABC-4D95-A542-49F5CF06888B}.Debug|x64.Build.0 = Debug|x64
+		{D1708BA9-CC7B-4B7D-BB51-DCF7871947F2}.Debug|x64.ActiveCfg = Debug|x64
+		{D1708BA9-CC7B-4B7D-BB51-DCF7871947F2}.Debug|x64.Build.0 = Debug|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {339D71AF-EE6B-4D9B-93A6-FA2D4A897CD2}
+	EndGlobalSection
+EndGlobal
