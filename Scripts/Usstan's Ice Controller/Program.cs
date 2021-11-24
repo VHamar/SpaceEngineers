@@ -23,11 +23,6 @@ namespace IngameScript
     partial class Program : MyGridProgram
     {
         #region mdk preserve
-        // ---=== Usstan's Ice Controller ===---
-        // This script was created for use on worlds with water (WaterMod) where pumping ice from the water
-        // can quickly result in all cargo containers on the base being full of ice. I originally used 
-        // Coxy's Ice Pump, but wanted a little more control and configuration
-
         // Limit for ice in containers.
         private readonly long maxIceAmount = 10000;
 
@@ -69,7 +64,7 @@ namespace IngameScript
             pumpGroup.GetBlocksOfType(iceLcds);
             Echo("Lcds found: " + iceLcds.Count);
 
-            var iceAmount = CountIce();
+            var iceAmount = CountIce(icePumps);
 
             foreach (var pump in icePumps)
             {
@@ -79,9 +74,16 @@ namespace IngameScript
             UpdateLcds(iceLcds, programBlockScreen, CreateScreenOutput(icePumps, iceAmount));
         }
 
-        private int CountIce()
+        private int CountIce(List<IMyCollector> pumps)
         {
+            Echo("Found Ice in:");
             var iceAmount = 0;
+
+            foreach(var pump in pumps)
+            {
+                var ice = CountIceAmount(pump, pump.CustomName);
+                iceAmount += ice;
+            }
 
             var cargoContainers = new List<IMyCargoContainer>();
             if (sameGridOnly)
@@ -93,18 +95,28 @@ namespace IngameScript
                 GridTerminalSystem.GetBlocksOfType(cargoContainers);
             }
 
-            Echo("Found Ice in:");
             foreach (var cargoContainer in cargoContainers)
             {
-                var items = new List<MyInventoryItem>();
-                cargoContainer.GetInventory().GetItems(items, item => item.ToString().Contains("MyObjectBuilder_Ore/Ice"));
-                foreach (var ice in items)
-                {
-                    Echo(cargoContainer.CustomName + ": " + ice.Amount);
-                    iceAmount += (int)ice.Amount;
-                }
+                var ice = CountIceAmount(cargoContainer, cargoContainer.CustomName);
+                iceAmount += ice;
             }
             Echo("");
+            return iceAmount;
+        }
+
+        private int CountIceAmount(IMyCubeBlock container, string name)
+        {
+            var iceAmount = 0;
+            var items = new List<MyInventoryItem>();
+            container.GetInventory().GetItems(items, item => item.ToString().Contains("MyObjectBuilder_Ore/Ice"));
+            foreach (var ice in items)
+            {
+                iceAmount += (int)ice.Amount;
+            }
+            if (iceAmount > 0)
+            {
+                Echo(name + ": " + iceAmount);
+            }
             return iceAmount;
         }
 
