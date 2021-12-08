@@ -46,7 +46,7 @@ namespace IngameScript
             programBlockScreen = Me.GetSurface(0);
         }
 
-        public void Main(string argument, UpdateType updateSource)
+        public void Main()
         {
             var pumpGroup = GridTerminalSystem.GetBlockGroupWithName(groupName);
             if (pumpGroup == null)
