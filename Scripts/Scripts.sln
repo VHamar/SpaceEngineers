@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.31911.196
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Usstan's Ice Controller", "Usstan's Ice Controller\Usstan's Ice Controller.csproj", "{B50AC57D-5ABC-4D95-A542-49F5CF06888B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAS", "DAS\DAS.csproj", "{6FDD406A-9669-41D4-9955-C1DE88F798A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -12,6 +14,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B50AC57D-5ABC-4D95-A542-49F5CF06888B}.Debug|x64.ActiveCfg = Debug|x64
 		{B50AC57D-5ABC-4D95-A542-49F5CF06888B}.Debug|x64.Build.0 = Debug|x64
+		{6FDD406A-9669-41D4-9955-C1DE88F798A2}.Debug|x64.ActiveCfg = Debug|x64
+		{6FDD406A-9669-41D4-9955-C1DE88F798A2}.Debug|x64.Build.0 = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
