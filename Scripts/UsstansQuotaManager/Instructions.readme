@@ -1,0 +1,27 @@
+﻿Usstan's Quota Manager (UQM)
+Version 0.3.0
+
+UQM is a simple quota manager for Space Engineers, it's fully automated 
+script enables or disables functional blocks based on the total inventory 
+amount of a specified resources across all blocks with storage on the same 
+grid. It scans the main grid (where the PB is) for blocks that have "[Managed]"
+in their name, and reads quota settings from the blocks Custom Data. 
+
+When you add [Managed] to a block's name, UQM will check if it have a UQM
+configuration in the Custom Data, and if not, it will add the config section
+with some examples and the block will show up in the list on the screen in 
+"Config" state. 
+
+Just go to the custom Data and specify what resource type and resource you are
+looking for and specify the amount. Example below:
+
+[Quota Managed]
+  Quota=MyObjectBuilder_PhysicalObject:Algae:100
+[/Quota Managed]
+
+and if not it doesn't already have a managed section 
+in Custom Data, the script will add a template for you to configure, 
+just give it a moment to run after renaming the block.
+
+I built this script because I needed a way to turn off blocks like Algae Farms, 
+Collectors (water mod ice) and stone mining, but I'm also using it for other things.
