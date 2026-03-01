@@ -65,7 +65,7 @@ namespace IngameScript
             IMyTextSurface surface = Me.GetSurface(0);
             bool isAutomaton = Me.BlockDefinition.SubtypeId.Contains("Reskin");
             long surfaceId = Me.EntityId; // Use PB EntityId for its surface
-            DrawStatusDisplay(surface, surfaceId, statusList, allBlocks.Count, totalInventory.Count, isAutomaton);
+            DrawStatusDisplay(surface, surfaceId, statusList, allBlocks.Count, totalInventory.Count, isAutomaton, SCROLL_SPEED, 0.55f);
             
             // Draw to all [UQM-Status] LCD monitors
             List<IMyTextPanel> urmDisplays = new List<IMyTextPanel>();
@@ -76,7 +76,9 @@ namespace IngameScript
             
             foreach (var panel in urmDisplays)
             {
-                DrawStatusDisplay(panel, panel.EntityId, statusList, allBlocks.Count, totalInventory.Count, false);
+                float panelScrollSpeed, panelFontSize;
+                ParsePanelConfig(panel, out panelScrollSpeed, out panelFontSize);
+                DrawStatusDisplay(panel, panel.EntityId, statusList, allBlocks.Count, totalInventory.Count, false, panelScrollSpeed, panelFontSize);
             }
             
             // Write inventory list to programmable block's Custom Data
@@ -130,6 +132,69 @@ namespace IngameScript
             return inventory;
         }
 
+        private void ParsePanelConfig(IMyTextPanel panel, out float scrollSpeed, out float fontSize)
+        {
+            // Default values
+            scrollSpeed = SCROLL_SPEED;
+            fontSize = 0.55f;
+            
+            string customData = panel.CustomData;
+            
+            // Check if config section exists
+            if (!customData.Contains("[UQM-Config]"))
+            {
+                // Add config section
+                string configSection = "[UQM-Config]\n" +
+                                      "// Configuration for this display\n" +
+                                      "// ScrollSpeed: Speed of scrolling (default 10)\n" +
+                                      "// FontSize: Size of text (default 0.55)\n" +
+                                      "ScrollSpeed=10\n" +
+                                      "FontSize=0.55\n" +
+                                      "[/UQM-Config]\n";
+                
+                if (string.IsNullOrWhiteSpace(customData))
+                {
+                    panel.CustomData = configSection;
+                }
+                else
+                {
+                    panel.CustomData = customData.TrimEnd() + "\n\n" + configSection;
+                }
+                return;
+            }
+            
+            // Parse config section
+            int startIndex = customData.IndexOf("[UQM-Config]");
+            int endIndex = customData.IndexOf("[/UQM-Config]");
+            
+            if (startIndex >= 0 && endIndex > startIndex)
+            {
+                string configSection = customData.Substring(startIndex, endIndex - startIndex);
+                string[] lines = configSection.Split('\n');
+                
+                foreach (string line in lines)
+                {
+                    string trimmedLine = line.Trim();
+                    if (trimmedLine.StartsWith("ScrollSpeed="))
+                    {
+                        float value;
+                        if (float.TryParse(trimmedLine.Substring(12), out value))
+                        {
+                            scrollSpeed = value;
+                        }
+                    }
+                    else if (trimmedLine.StartsWith("FontSize="))
+                    {
+                        float value;
+                        if (float.TryParse(trimmedLine.Substring(9), out value))
+                        {
+                            fontSize = value;
+                        }
+                    }
+                }
+            }
+        }
+
         private void UpdateInventoryListInCustomData(Dictionary<string, double> inventory)
         {
             string currentData = Me.CustomData;
@@ -180,7 +245,7 @@ namespace IngameScript
             Me.CustomData = (beforeSection.TrimEnd() + "\n\n" + sb.ToString() + afterSection).Trim();
         }
 
-        private void DrawStatusDisplay(IMyTextSurface surface, long surfaceId, List<BlockStatus> statusList, int managedCount, int inventoryCount, bool isAutomaton)
+        private void DrawStatusDisplay(IMyTextSurface surface, long surfaceId, List<BlockStatus> statusList, int managedCount, int inventoryCount, bool isAutomaton, float scrollSpeed, float fontSize)
         {
             surface.ContentType = ContentType.SCRIPT;
             surface.Script = "";
@@ -193,7 +258,9 @@ namespace IngameScript
             // X offset for Automaton PB
             float xOffset = isAutomaton ? 50f : 0f;
             
-            float lineHeight = 30f; // Reduced from 35f for more compact display
+            // Calculate line height: font height + small static spacer
+            const float rowSpacer = 3f; // Narrow static spacing between rows
+            float lineHeight = fontSize * 55f + rowSpacer;
             
             using (var frame = surface.DrawFrame())
             {
@@ -321,7 +388,7 @@ namespace IngameScript
                     
                     var nameText = new MySprite(SpriteType.TEXT, displayText,
                         new Vector2(90 + xOffset, yPos),
-                        null, Color.White, "White", TextAlignment.LEFT, 0.55f);
+                        null, Color.White, "White", TextAlignment.LEFT, fontSize);
                     frame.Add(nameText);
                     
                     // Add quantity/quota column (right-aligned)
@@ -329,8 +396,8 @@ namespace IngameScript
                     {
                         string quantityText = string.Format("{0:N0}/{1:N0}", status.CurrentAmount, status.QuotaAmount);
                         var quantitySprite = new MySprite(SpriteType.TEXT, quantityText,
-                            new Vector2(screenSize.X - 20 + xOffset, yPos),
-                            null, new Color(180, 180, 180), "White", TextAlignment.RIGHT, 0.5f);
+                            new Vector2(screenSize.X - 30 + xOffset, yPos),
+                            null, new Color(180, 180, 180), "White", TextAlignment.RIGHT, fontSize * 0.9f);
                         frame.Add(quantitySprite);
                     }
                     
@@ -346,7 +413,7 @@ namespace IngameScript
                 // Update scroll position for this display
                 if (maxScroll > 0)
                 {
-                    scrollState.Offset += SCROLL_SPEED * scrollState.Direction;
+                    scrollState.Offset += scrollSpeed * scrollState.Direction;
                     
                     // Reverse direction at bounds
                     if (scrollState.Offset >= maxScroll)
