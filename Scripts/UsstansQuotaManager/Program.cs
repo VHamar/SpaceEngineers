@@ -394,7 +394,8 @@ namespace IngameScript
                     // Add quantity/quota column (right-aligned)
                     if (status.Status == "RUNNING" || status.Status == "STOPPED")
                     {
-                        string quantityText = string.Format("{0:N0}/{1:N0}", status.CurrentAmount, status.QuotaAmount);
+                        string directionPrefix = status.ReverseQuota ? ">" : "<";
+                        string quantityText = string.Format("{0:N0}/{1}{2:N0}", status.CurrentAmount, directionPrefix, status.QuotaAmount);
                         var quantitySprite = new MySprite(SpriteType.TEXT, quantityText,
                             new Vector2(screenSize.X - 30 + xOffset, yPos),
                             null, new Color(180, 180, 180), "White", TextAlignment.RIGHT, fontSize * 0.9f);
@@ -476,8 +477,12 @@ namespace IngameScript
             
             string itemKey = string.Format("{0}:{1}", quotaParts[0], quotaParts[1]);
             string resourceName = quotaParts[1];
+            string amountString = quotaParts[2];
+            bool reverseQuota = amountString.StartsWith(">");
+            if (reverseQuota || amountString.StartsWith("<"))
+                amountString = amountString.Substring(1);
             double quotaAmount;
-            if (!double.TryParse(quotaParts[2], out quotaAmount))
+            if (!double.TryParse(amountString, out quotaAmount))
             {
                 status.Status = "ERROR";
                 status.ErrorMessage = "Invalid Amount";
@@ -490,6 +495,7 @@ namespace IngameScript
             // Store amounts in status
             status.CurrentAmount = currentAmount;
             status.QuotaAmount = quotaAmount;
+            status.ReverseQuota = reverseQuota;
             
             // Check if block can be enabled/disabled
             IMyFunctionalBlock functionalBlock = block as IMyFunctionalBlock;
@@ -501,21 +507,37 @@ namespace IngameScript
             }
             
             // Control block based on quota
-            if (currentAmount >= quotaAmount)
+            if (reverseQuota)
             {
-                if (functionalBlock.Enabled)
+                // Reverse quota: run when amount exceeds threshold
+                if (currentAmount > quotaAmount)
                 {
-                    functionalBlock.Enabled = false;
+                    if (!functionalBlock.Enabled)
+                        functionalBlock.Enabled = true;
+                    status.Status = "RUNNING";
                 }
-                status.Status = "STOPPED";
+                else
+                {
+                    if (functionalBlock.Enabled)
+                        functionalBlock.Enabled = false;
+                    status.Status = "STOPPED";
+                }
             }
             else
             {
-                if (!functionalBlock.Enabled)
+                // Normal quota: run when amount is below threshold
+                if (currentAmount >= quotaAmount)
                 {
-                    functionalBlock.Enabled = true;
+                    if (functionalBlock.Enabled)
+                        functionalBlock.Enabled = false;
+                    status.Status = "STOPPED";
                 }
-                status.Status = "RUNNING";
+                else
+                {
+                    if (!functionalBlock.Enabled)
+                        functionalBlock.Enabled = true;
+                    status.Status = "RUNNING";
+                }
             }
             
             return status;
@@ -561,7 +583,8 @@ namespace IngameScript
                                     "// Quota=ResourceType:ResourceName:Amount\n" +
                                     "// Examples:\n" +
                                     "// Quota=MyObjectBuilder_Ore:Ice:5000\n" +
-                                    "// Quota=MyObjectBuilder_Ore:Stone:2000\n" +
+                                    "// Quota=MyObjectBuilder_Ore:Stone:<2000\n" +
+                                    "// Quota=MyObjectBuilder_Ingot:Stone:>2000\n" +
                                     "// Quota=MyObjectBuilder_PhysicalObject:Algae:100\n" +
                                     "//\n" +
                                     "// You can get a full list of resource types by looking \n" +
@@ -601,6 +624,7 @@ namespace IngameScript
         public string ErrorMessage;
         public double CurrentAmount;
         public double QuotaAmount;
+        public bool ReverseQuota;
     }
 
 
